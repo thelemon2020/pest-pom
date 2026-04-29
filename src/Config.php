@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Thelemon2020\PestPages;
 
+use ReflectionClass;
+use RuntimeException;
+
 final class Config
 {
     private const DEFAULT_PATH = 'tests/Browser/Pages';
@@ -32,12 +35,44 @@ final class Config
 
     /**
      * The configured pages path as an absolute filesystem path.
+     *
+     * If the configured path is already absolute it is returned unchanged,
+     * otherwise it is resolved relative to the project root.
      */
     public static function absolutePath(): string
     {
-        $relative = self::path();
-        $root     = function_exists('base_path') ? base_path() : getcwd();
+        $path = self::path();
 
-        return $root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+        if (str_starts_with($path, '/') || preg_match('/^[A-Z]:\\\\/i', $path)) {
+            return $path;
+        }
+
+        $root = function_exists('base_path') ? base_path() : getcwd();
+
+        return $root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $path);
+    }
+
+    /**
+     * Throws if $className does not live in the configured pages directory.
+     */
+    public static function assertPageIsInConfiguredDirectory(string $className): void
+    {
+        $file = (new ReflectionClass($className))->getFileName();
+
+        if ($file === false) {
+            return;
+        }
+
+        $sep        = DIRECTORY_SEPARATOR;
+        $configured = rtrim(str_replace(['/', '\\'], $sep, self::absolutePath()), $sep);
+        $actual     = str_replace(['/', '\\'], $sep, $file);
+
+        if (! str_starts_with($actual, $configured.$sep)) {
+            throw new RuntimeException(sprintf(
+                'Page [%s] must live in the configured pages directory [%s].',
+                $className,
+                self::absolutePath(),
+            ));
+        }
     }
 }

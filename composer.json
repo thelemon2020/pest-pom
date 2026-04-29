@@ -18,11 +18,19 @@
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-browser": "^4.0"
     },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0"
+    },
     "autoload": {
         "psr-4": {
             "Thelemon2020\\PestPages\\": "src/"
         },
         "files": ["src/Autoload.php"]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Thelemon2020\\PestPages\\Tests\\": "tests/"
+        }
     },
     "extra": {
         "laravel": {
@@ -35,6 +43,9 @@
                 "Thelemon2020\\PestPages\\Plugin"
             ]
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest"
     },
     "config": {
         "allow-plugins": {

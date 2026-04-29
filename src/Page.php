@@ -6,8 +6,6 @@ namespace Thelemon2020\PestPages;
 
 use Pest\Browser\Api\AwaitableWebpage;
 use Pest\Browser\Api\PendingAwaitablePage;
-use ReflectionClass;
-use RuntimeException;
 
 /**
  * Base class for all page objects.
@@ -40,7 +38,7 @@ abstract class Page
      */
     public static function open(): static
     {
-        static::assertInConfiguredDirectory();
+        Config::assertPageIsInConfiguredDirectory(static::class);
 
         return new static(visit(static::url()));
     }
@@ -81,25 +79,4 @@ abstract class Page
         return $result;
     }
 
-    /**
-     * Throws if this page class does not live in the configured pages directory.
-     */
-    private static function assertInConfiguredDirectory(): void
-    {
-        $file      = (new ReflectionClass(static::class))->getFileName();
-        $configured = realpath(Config::absolutePath());
-        $actual     = $file !== false ? realpath($file) : false;
-
-        if ($configured === false || $actual === false) {
-            return;
-        }
-
-        if (! str_starts_with($actual, $configured.DIRECTORY_SEPARATOR)) {
-            throw new RuntimeException(sprintf(
-                'Page [%s] must live in the configured pages directory [%s].',
-                static::class,
-                Config::absolutePath(),
-            ));
-        }
-    }
 }
