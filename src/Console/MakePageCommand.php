@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Thelemon2020\PestPages\Console;
 
 use Illuminate\Console\Command;
+use Thelemon2020\PestPages\Config;
 
 final class MakePageCommand extends Command
 {
@@ -12,7 +13,7 @@ final class MakePageCommand extends Command
         {name : The name of the page (e.g. Login or LoginPage)}
         {--concerns= : Comma-separated concerns to include: forms, alerts, modals, navigation}';
 
-    protected $description = 'Create a new Pest Pages page object in tests/Browser/Pages';
+    protected $description = 'Create a new Pest Pages page object';
 
     private const CONCERN_MAP = [
         'forms'      => 'InteractsWithForms',
@@ -25,9 +26,9 @@ final class MakePageCommand extends Command
     {
         $className = $this->resolveClassName($this->argument('name'));
         $concerns  = $this->parseConcerns();
+        $directory = Config::absolutePath();
         $namespace = $this->resolveNamespace();
-        $directory = base_path('tests/Browser/Pages');
-        $filePath  = $directory.'/'.$className.'.php';
+        $filePath  = $directory.DIRECTORY_SEPARATOR.$className.'.php';
 
         if (file_exists($filePath)) {
             $this->components->error("Page [{$filePath}] already exists.");
@@ -76,14 +77,23 @@ final class MakePageCommand extends Command
 
     private function resolveNamespace(): string
     {
-        $composerPath = base_path('composer.json');
+        $configuredPath = Config::path();
+        $composerPath   = base_path('composer.json');
 
         if (file_exists($composerPath)) {
             $composer = json_decode(file_get_contents($composerPath), true);
 
             foreach ($composer['autoload-dev']['psr-4'] ?? [] as $namespace => $path) {
-                if (rtrim($path, '/') === 'tests') {
-                    return rtrim($namespace, '\\').'\\Browser\\Pages';
+                $normalizedRoot = rtrim($path, '/');
+
+                if ($configuredPath === $normalizedRoot) {
+                    return rtrim($namespace, '\\');
+                }
+
+                if (str_starts_with($configuredPath, $normalizedRoot.'/')) {
+                    $remainder = substr($configuredPath, strlen($normalizedRoot) + 1);
+
+                    return rtrim($namespace, '\\').'\\'.str_replace('/', '\\', $remainder);
                 }
             }
         }

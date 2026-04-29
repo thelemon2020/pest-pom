@@ -18,6 +18,22 @@ Page Objects keep your browser tests readable and maintainable by encapsulating 
 composer require thelemon2020/pest-pages --dev
 ```
 
+### Publishing the config
+
+```bash
+php artisan vendor:publish --tag=pest-pages-config
+```
+
+This creates `config/pest-pages.php`:
+
+```php
+return [
+    'path' => 'tests/Browser/Pages',
+];
+```
+
+`path` controls where the `pest:page` generator writes new files and where `Page::open()` expects page classes to live at runtime. Change it if your project uses a different directory.
+
 ---
 
 ## Core Concepts
