@@ -53,6 +53,16 @@ final class Config
     }
 
     /**
+     * The absolute path to the components directory, conventionally a sibling of the pages directory.
+     *
+     * e.g. tests/Browser/Pages → tests/Browser/Components
+     */
+    public static function componentsAbsolutePath(): string
+    {
+        return dirname(self::absolutePath()).DIRECTORY_SEPARATOR.'Components';
+    }
+
+    /**
      * Throws if $className does not live in the configured pages directory.
      */
     public static function assertPageIsInConfiguredDirectory(string $className): void

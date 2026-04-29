@@ -7,7 +7,7 @@ namespace Thelemon2020\PestPom\Concerns;
 use Thelemon2020\PestPom\Page;
 
 /**
- * @mixin Page
+ * @mixin Page|Component
  */
 trait InteractsWithForms
 {

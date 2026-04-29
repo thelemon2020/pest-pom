@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Thelemon2020\PestPom;
 
 use Illuminate\Support\ServiceProvider;
+use Thelemon2020\PestPom\Console\MakeComponentCommand;
 use Thelemon2020\PestPom\Console\MakePageCommand;
 
 final class PestPomServiceProvider extends ServiceProvider
@@ -24,7 +25,7 @@ final class PestPomServiceProvider extends ServiceProvider
                 __DIR__.'/../config/pest-pom.php' => config_path('pest-pom.php'),
             ], 'pest-pom-config');
 
-            $this->commands([MakePageCommand::class]);
+            $this->commands([MakePageCommand::class, MakeComponentCommand::class]);
         }
     }
 }

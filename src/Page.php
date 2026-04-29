@@ -44,6 +44,19 @@ abstract class Page
     }
 
     /**
+     * Create a typed Component instance backed by this page's browser session.
+     *
+     * @template TComponent of Component
+     *
+     * @param  class-string<TComponent>  $componentClass
+     * @return TComponent
+     */
+    public function component(string $componentClass): Component
+    {
+        return new $componentClass($this->browser);
+    }
+
+    /**
      * Explicitly navigate to a different page class.
      * Use when an action (e.g. submitting a form) takes you to a new screen.
      *
