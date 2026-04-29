@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Thelemon2020\PestPom;
+
+use Illuminate\Support\ServiceProvider;
+use Thelemon2020\PestPom\Console\MakePageCommand;
+
+final class PestPomServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/pest-pom.php',
+            'pest-pom',
+        );
+    }
+
+    public function boot(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/pest-pom.php' => config_path('pest-pom.php'),
+            ], 'pest-pom-config');
+
+            $this->commands([MakePageCommand::class]);
+        }
+    }
+}
