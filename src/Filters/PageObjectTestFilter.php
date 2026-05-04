@@ -43,9 +43,9 @@ final readonly class PageObjectTestFilter implements TestCaseMethodFilter
     }
 
     /**
-     * Returns true if the closure contains a page() call or a ::open() call on a Page subclass.
+     * Returns true if the closure's source contains a page() call or a ::open() static call.
      */
-    private function isPageObjectTest(Closure $closure): bool
+    public function isPageObjectTest(Closure $closure): bool
     {
         try {
             $ref = new ReflectionFunction($closure);
@@ -73,6 +73,17 @@ final readonly class PageObjectTestFilter implements TestCaseMethodFilter
         }
 
         $code = implode('', array_slice($lines, $startLine - 1, $endLine - $startLine + 1));
+
+        return $this->containsPageObjectCall($code);
+    }
+
+    /**
+     * Returns true if the given PHP source snippet contains a bare page() call
+     * or a ::open() static call. Accepts a raw code string so it can be tested
+     * without needing real closure files.
+     */
+    public function containsPageObjectCall(string $code): bool
+    {
         $tokens = token_get_all('<?php '.$code);
         $count = count($tokens);
 

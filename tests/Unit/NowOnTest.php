@@ -2,17 +2,8 @@
 
 declare(strict_types=1);
 
-use Pest\Browser\Api\PendingAwaitablePage;
-use Pest\Browser\Enums\BrowserType;
-use Pest\Browser\Enums\Device;
 use Thelemon2020\PestPom\Tests\Fixtures\AnotherPage;
 use Thelemon2020\PestPom\Tests\Fixtures\ExamplePage;
-
-// Creates a PendingAwaitablePage without starting a real browser.
-function pendingBrowser(): PendingAwaitablePage
-{
-    return new PendingAwaitablePage(BrowserType::CHROME, Device::DESKTOP, '/example', []);
-}
 
 // Creates an ExamplePage that reports being at $url, without a live browser.
 function examplePageAt(string $url): ExamplePage
