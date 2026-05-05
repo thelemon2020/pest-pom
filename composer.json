@@ -1,7 +1,7 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "thelemon2020/pest-pom",
-    "authors": ["Chris Lemon"],
+    "name": "thelemon2020/pest-plugin-pom",
+    "authors": [{"name": "Chris Lemon"}],
     "description": "A Pest plugin for writing browser tests using the Page Object Model.",
     "keywords": [
         "pest",
