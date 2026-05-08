@@ -52,8 +52,10 @@ abstract class Component
     /**
      * The fully-resolved CSS selector for this component, including any parent
      * component selector prefix. Empty string when no selector is defined.
+     *
+     * Intended for use inside component subclass methods, not in test code.
      */
-    public function resolvedSelector(): string
+    protected function resolvedSelector(): string
     {
         return $this->resolvedSelector;
     }

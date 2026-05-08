@@ -29,38 +29,54 @@ it('a component subclass with no selector override returns an empty string', fun
     expect($component::selector())->toBe('');
 });
 
-it('resolvedSelector returns the own selector when there is no parent', function () {
-    expect((new ExampleComponent(pendingBrowser()))->resolvedSelector())->toBe('#example');
-});
-
-it('resolvedSelector returns empty string when there is no selector', function () {
-    $component = new class(pendingBrowser()) extends Component {};
-
-    expect($component->resolvedSelector())->toBe('');
-});
-
-it('component() on a Component scopes the child selector under the parent', function () {
-    $parent = new class(pendingBrowser()) extends Component {
-        public static function selector(): string { return '#nav'; }
+it('assertSee on a component with a selector scopes to that selector', function () {
+    $component = new class(pendingBrowser()) extends ExampleComponent {
+        public array $calls = [];
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
     };
 
-    $child = $parent->component(ExampleComponent::class);
+    $component->assertSee('text');
 
-    expect($child->resolvedSelector())->toBe('#nav #example');
-});
-
-it('a child component with no selector has an empty resolvedSelector even under a parent', function () {
-    $noSelectorComponent = new class(pendingBrowser()) extends Component {};
-
-    $child = (new ExampleComponent(pendingBrowser()))->component($noSelectorComponent::class);
-
-    expect($child->resolvedSelector())->toBe('');
+    expect($component->calls)->toBe([['assertSeeIn', '#example', 'text']]);
 });
 
 it('scoped assertions throw LogicException when selector is empty', function () {
     $component = new class(pendingBrowser()) extends Component {};
 
     $component->assertSee('text');
+})->throws(\LogicException::class);
+
+it('component() on a Component scopes the child selector under the parent', function () {
+    $childInstance = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return '#example'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $parent = new class(pendingBrowser()) extends Component {
+        public static function selector(): string { return '#nav'; }
+    };
+
+    $child = $parent->component($childInstance::class);
+    $child->assertSee('text');
+
+    expect($child->calls)->toBe([['assertSeeIn', '#nav #example', 'text']]);
+});
+
+it('a child component with no selector throws even when created under a parent', function () {
+    $noSelectorInstance = new class(pendingBrowser()) extends Component {};
+
+    $child = (new ExampleComponent(pendingBrowser()))->component($noSelectorInstance::class);
+
+    $child->assertSee('text');
 })->throws(\LogicException::class);
 
 it('assertSee delegates to assertSeeIn with the resolved selector', function () {
