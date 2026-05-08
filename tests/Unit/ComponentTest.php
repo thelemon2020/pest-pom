@@ -95,6 +95,69 @@ it('assertSee delegates to assertSeeIn with the resolved selector', function () 
     expect($component->calls)->toBe([['assertSeeIn', '#nav', 'Hello']]);
 });
 
+it('click scopes the selector to the component', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return '#nav'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->click('.menu-item');
+
+    expect($component->calls)->toBe([['click', '#nav .menu-item']]);
+});
+
+it('type scopes the field selector but not the value', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return '#search'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->type('input', 'pest php');
+
+    expect($component->calls)->toBe([['type', '#search input', 'pest php']]);
+});
+
+it('drag scopes both the from and to selectors', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return '#board'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->drag('.card', '.column');
+
+    expect($component->calls)->toBe([['drag', '#board .card', '#board .column']]);
+});
+
+it('interactions pass the selector through unchanged when no component selector is set', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->click('.menu-item');
+
+    expect($component->calls)->toBe([['click', '.menu-item']]);
+});
+
 it('assertCount composes the child selector under the resolved selector', function () {
     $component = new class(pendingBrowser()) extends Component {
         public array $calls = [];

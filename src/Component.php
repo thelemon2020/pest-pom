@@ -151,6 +151,98 @@ abstract class Component
         return $this->callBrowser('assertDontSeeIn', $this->resolvedSelector . ' ' . $childSelector, $text);
     }
 
+    public function click(string $selector): static
+    {
+        return $this->callBrowser('click', $this->scope($selector));
+    }
+
+    public function rightClick(string $selector): static
+    {
+        return $this->callBrowser('rightClick', $this->scope($selector));
+    }
+
+    public function type(string $field, string $value): static
+    {
+        return $this->callBrowser('type', $this->scope($field), $value);
+    }
+
+    public function typeSlowly(string $field, string $value, int $delay = 100): static
+    {
+        return $this->callBrowser('typeSlowly', $this->scope($field), $value, $delay);
+    }
+
+    public function fill(string $field, string $value): static
+    {
+        return $this->callBrowser('fill', $this->scope($field), $value);
+    }
+
+    public function append(string $field, string $value): static
+    {
+        return $this->callBrowser('append', $this->scope($field), $value);
+    }
+
+    public function clear(string $field): static
+    {
+        return $this->callBrowser('clear', $this->scope($field));
+    }
+
+    public function hover(string $selector): static
+    {
+        return $this->callBrowser('hover', $this->scope($selector));
+    }
+
+    public function select(string $field, array|string|int $option): static
+    {
+        return $this->callBrowser('select', $this->scope($field), $option);
+    }
+
+    public function radio(string $field, string $value): static
+    {
+        return $this->callBrowser('radio', $this->scope($field), $value);
+    }
+
+    public function check(string $field, ?string $value = null): static
+    {
+        return $this->callBrowser('check', $this->scope($field), $value);
+    }
+
+    public function uncheck(string $field, ?string $value = null): static
+    {
+        return $this->callBrowser('uncheck', $this->scope($field), $value);
+    }
+
+    public function attach(string $field, string $path): static
+    {
+        return $this->callBrowser('attach', $this->scope($field), $path);
+    }
+
+    public function keys(string $selector, array|string $keys): static
+    {
+        return $this->callBrowser('keys', $this->scope($selector), $keys);
+    }
+
+    public function drag(string $from, string $to): static
+    {
+        return $this->callBrowser('drag', $this->scope($from), $this->scope($to));
+    }
+
+    public function text(string $selector): ?string
+    {
+        return $this->browser->text($this->scope($selector));
+    }
+
+    public function attribute(string $selector, string $attribute): ?string
+    {
+        return $this->browser->attribute($this->scope($selector), $attribute);
+    }
+
+    private function scope(string $childSelector): string
+    {
+        return $this->resolvedSelector !== ''
+            ? $this->resolvedSelector . ' ' . $childSelector
+            : $childSelector;
+    }
+
     private function requireSelector(): void
     {
         if ($this->resolvedSelector === '') {
