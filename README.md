@@ -146,9 +146,10 @@ page(LoginPage::class)
 
 ## Writing Tests
 
-The plugin automatically detects any test that calls `page()` or `::open()` and marks it as a browser test, starting the Playwright server as needed. You do not need to annotate tests or configure anything.
+Tests that use Page Objects must live in `tests/Browser/`. Pest's browser plugin picks up tests from that directory and starts the Playwright server automatically — no additional annotation is needed.
 
 ```php
+// tests/Browser/AuthTest.php
 it('allows a user to log in', function () {
     page(LoginPage::class)
         ->loginAs('jane@example.com', 'password')

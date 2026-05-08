@@ -173,3 +173,167 @@ it('assertCount composes the child selector under the resolved selector', functi
 
     expect($component->calls)->toBe([['assertCount', '#nav .item', 3]]);
 });
+
+// toCssLocator — plain element-type selectors get :is(*) appended
+
+it('assertSee appends :is(*) to a plain element-type selector', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return 'nav'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertSee('text');
+
+    expect($component->calls)->toBe([['assertSeeIn', 'nav:is(*)', 'text']]);
+});
+
+it('assertVisible appends :is(*) to a plain element-type selector', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return 'main'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertVisible();
+
+    expect($component->calls)->toBe([['assertVisible', 'main:is(*)']]);
+});
+
+it('assertCount appends :is(*) when composing plain element selectors', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return 'nav'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertCount('a', 3);
+
+    expect($component->calls)->toBe([['assertCount', 'nav a:is(*)', 3]]);
+});
+
+it('assertSeeIn appends :is(*) when composing plain element selectors', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return 'section'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertSeeIn('p', 'hello');
+
+    expect($component->calls)->toBe([['assertSeeIn', 'section p:is(*)', 'hello']]);
+});
+
+// toCssLocator — selectors that already look like CSS pass through unchanged
+
+it('assertSee passes an id selector through unchanged', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return '#main'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertSee('text');
+
+    expect($component->calls)->toBe([['assertSeeIn', '#main', 'text']]);
+});
+
+it('assertSee passes a class selector through unchanged', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return '.sidebar'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertSee('text');
+
+    expect($component->calls)->toBe([['assertSeeIn', '.sidebar', 'text']]);
+});
+
+it('assertSee passes an attribute selector through unchanged', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return '[data-nav]'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertSee('text');
+
+    expect($component->calls)->toBe([['assertSeeIn', '[data-nav]', 'text']]);
+});
+
+it('assertSee passes an internal: selector through unchanged', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return 'internal:role=button'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertSee('text');
+
+    expect($component->calls)->toBe([['assertSeeIn', 'internal:role=button', 'text']]);
+});
+
+it('assertSee passes a selector with a child combinator through unchanged', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return 'nav > ul'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertSee('text');
+
+    expect($component->calls)->toBe([['assertSeeIn', 'nav > ul', 'text']]);
+});
+
+it('assertSee passes a selector with a pseudo-class through unchanged', function () {
+    $component = new class(pendingBrowser()) extends Component {
+        public array $calls = [];
+        public static function selector(): string { return 'nav:first-child'; }
+        protected function callBrowser(string $method, mixed ...$args): static
+        {
+            $this->calls[] = [$method, ...$args];
+            return $this;
+        }
+    };
+
+    $component->assertSee('text');
+
+    expect($component->calls)->toBe([['assertSeeIn', 'nav:first-child', 'text']]);
+});
