@@ -377,6 +377,107 @@ it('returns results for a valid search', function () {
 
 Components support all four concern traits (`InteractsWithForms`, `InteractsWithAlerts`, `InteractsWithModals`, `InteractsWithNavigation`) in exactly the same way as pages.
 
+### Scoped Assertions
+
+When `selector()` is defined, the component provides assertion methods that automatically scope their check to within the component's root element:
+
+| Method | Description |
+|---|---|
+| `assertSee(string $text)` | Assert the text appears within the component |
+| `assertDontSee(string $text)` | Assert the text does not appear within the component |
+| `assertVisible()` | Assert the component's root element is visible |
+| `assertPresent()` | Assert the component's root element is in the DOM |
+| `assertMissing()` | Assert the component's root element is absent from the DOM |
+| `assertCount(string $childSelector, int $expected)` | Assert the count of elements matching `$childSelector` within the component |
+| `assertSeeIn(string $childSelector, string $text)` | Assert text appears within a child element inside the component |
+| `assertDontSeeIn(string $childSelector, string $text)` | Assert text does not appear within a child element inside the component |
+
+All of these throw a `LogicException` if `selector()` returns an empty string.
+
+### Typed Component Accessors
+
+For cleaner test syntax and IDE autocompletion, define typed methods on your page class that return component instances:
+
+```php
+class DashboardPage extends Page
+{
+    public static function url(): string
+    {
+        return '/dashboard';
+    }
+
+    public function header(): NavBarComponent
+    {
+        return $this->component(NavBarComponent::class);
+    }
+
+    public function footer(): FooterComponent
+    {
+        return $this->component(FooterComponent::class);
+    }
+}
+```
+
+### Asserting Multiple Components
+
+`component()` returns a new component instance each time without mutating the page. To assert on multiple components in a single test, assign the page to a variable first and call component accessors on it as many times as you need:
+
+```php
+it('shows the correct layout for a logged-in user', function () {
+    $page = DashboardPage::open();
+
+    $page->header()
+        ->assertVisible()
+        ->assertSee('Dashboard');
+
+    $page->footer()
+        ->assertSee('Privacy Policy')
+        ->assertSee('Terms of Service');
+});
+```
+
+`$page` is never mutated by calling `header()` or `footer()`, so it remains valid throughout the test.
+
+### Sub-Component Composition
+
+Components can contain other components. Call `component()` on a component instance to create a child component whose selector is automatically scoped within the parent's:
+
+```php
+class NavBarComponent extends Component
+{
+    public static function selector(): string
+    {
+        return '#nav';
+    }
+
+    public function userMenu(): UserMenuComponent
+    {
+        return $this->component(UserMenuComponent::class);
+    }
+}
+
+class UserMenuComponent extends Component
+{
+    // resolved selector will be: #nav .user-menu
+    public static function selector(): string
+    {
+        return '.user-menu';
+    }
+}
+```
+
+```php
+it('displays the logged-in user in the nav', function () {
+    $page = DashboardPage::open();
+
+    $page->header()
+        ->userMenu()
+        ->assertSee('Jane Doe');
+});
+```
+
+The resolved selector is composed automatically — `UserMenuComponent` inherits `#nav` from `NavBarComponent` and appends its own `.user-menu`, producing `#nav .user-menu`.
+
 ---
 
 ## Available Concerns (Traits)
