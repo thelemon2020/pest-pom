@@ -345,12 +345,9 @@ page(DashboardPage::class)
 namespace Tests\Browser\Components;
 
 use Thelemon2020\PestPom\Component;
-use Thelemon2020\PestPom\Concerns\InteractsWithForms;
 
 class SearchBarComponent extends Component
 {
-    use InteractsWithForms;
-
     public static function selector(): string
     {
         return '#search-bar';
@@ -358,20 +355,21 @@ class SearchBarComponent extends Component
 
     public function search(string $query): static
     {
+        // fill() and click() are scoped to #search-bar automatically
         return $this
-            ->fillForm(['Search' => $query])
-            ->submitForm('Search');
+            ->fill('input[name=query]', $query)
+            ->click('button[type=submit]');
     }
 }
 ```
 
 ```php
 it('returns results for a valid search', function () {
-    page(DashboardPage::class)
-        ->component(SearchBarComponent::class)
+    $page = DashboardPage::open();
+
+    $page->component(SearchBarComponent::class)
         ->search('pest php')
-        ->assertSee('No results found')
-        ->assertSee('pest-plugin-browser');
+        ->assertSee('pest-plugin-browser');  // scoped to #search-bar
 });
 ```
 
@@ -393,6 +391,36 @@ When `selector()` is defined, the component provides assertion methods that auto
 | `assertDontSeeIn(string $childSelector, string $text)` | Assert text does not appear within a child element inside the component |
 
 All of these throw a `LogicException` if `selector()` returns an empty string.
+
+### Scoped Interactions
+
+The same scoping applies to interactions. The selectors you pass are treated as relative to the component's root element — the full composed selector is constructed for you:
+
+| Method | Description |
+|---|---|
+| `click(string $selector)` | Click an element within the component |
+| `rightClick(string $selector)` | Right-click an element within the component |
+| `type(string $field, string $value)` | Type into a field within the component |
+| `typeSlowly(string $field, string $value, int $delay = 100)` | Type slowly into a field within the component |
+| `fill(string $field, string $value)` | Fill a field within the component |
+| `append(string $field, string $value)` | Append text to a field within the component |
+| `clear(string $field)` | Clear a field within the component |
+| `hover(string $selector)` | Hover over an element within the component |
+| `select(string $field, array\|string\|int $option)` | Select a dropdown option within the component |
+| `radio(string $field, string $value)` | Select a radio button within the component |
+| `check(string $field, ?string $value = null)` | Check a checkbox within the component |
+| `uncheck(string $field, ?string $value = null)` | Uncheck a checkbox within the component |
+| `attach(string $field, string $path)` | Attach a file to an input within the component |
+| `keys(string $selector, array\|string $keys)` | Send keyboard input to an element within the component |
+| `drag(string $from, string $to)` | Drag one element to another, both scoped within the component |
+| `text(string $selector): ?string` | Return the text content of an element within the component |
+| `attribute(string $selector, string $attribute): ?string` | Return an attribute value of an element within the component |
+
+If `selector()` is empty, selectors are passed through unchanged — no scoping is applied and there is no error.
+
+The methods `press()`, `pressAndWaitFor()`, and `withKeyDown()` do not take CSS selectors and are not scoped — they work as normal via `__call` delegation.
+
+The four concern traits (`InteractsWithForms`, `InteractsWithAlerts`, `InteractsWithModals`, `InteractsWithNavigation`) call these interaction methods internally, so they also benefit from scoping automatically when used in a component with a defined selector.
 
 ### Typed Component Accessors
 
