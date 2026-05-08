@@ -78,7 +78,7 @@ abstract class Component
     {
         $this->requireSelector();
 
-        return $this->callBrowser('assertSeeIn', $this->resolvedSelector, $text);
+        return $this->callBrowser('assertSeeIn', $this->toCssLocator($this->resolvedSelector), $text);
     }
 
     /**
@@ -88,7 +88,7 @@ abstract class Component
     {
         $this->requireSelector();
 
-        return $this->callBrowser('assertDontSeeIn', $this->resolvedSelector, $text);
+        return $this->callBrowser('assertDontSeeIn', $this->toCssLocator($this->resolvedSelector), $text);
     }
 
     /**
@@ -98,7 +98,7 @@ abstract class Component
     {
         $this->requireSelector();
 
-        return $this->callBrowser('assertVisible', $this->resolvedSelector);
+        return $this->callBrowser('assertVisible', $this->toCssLocator($this->resolvedSelector));
     }
 
     /**
@@ -108,7 +108,7 @@ abstract class Component
     {
         $this->requireSelector();
 
-        return $this->callBrowser('assertPresent', $this->resolvedSelector);
+        return $this->callBrowser('assertPresent', $this->toCssLocator($this->resolvedSelector));
     }
 
     /**
@@ -118,7 +118,7 @@ abstract class Component
     {
         $this->requireSelector();
 
-        return $this->callBrowser('assertMissing', $this->resolvedSelector);
+        return $this->callBrowser('assertMissing', $this->toCssLocator($this->resolvedSelector));
     }
 
     /**
@@ -128,7 +128,7 @@ abstract class Component
     {
         $this->requireSelector();
 
-        return $this->callBrowser('assertCount', $this->resolvedSelector . ' ' . $childSelector, $expected);
+        return $this->callBrowser('assertCount', $this->toCssLocator($this->resolvedSelector . ' ' . $childSelector), $expected);
     }
 
     /**
@@ -138,7 +138,7 @@ abstract class Component
     {
         $this->requireSelector();
 
-        return $this->callBrowser('assertSeeIn', $this->resolvedSelector . ' ' . $childSelector, $text);
+        return $this->callBrowser('assertSeeIn', $this->toCssLocator($this->resolvedSelector . ' ' . $childSelector), $text);
     }
 
     /**
@@ -148,7 +148,7 @@ abstract class Component
     {
         $this->requireSelector();
 
-        return $this->callBrowser('assertDontSeeIn', $this->resolvedSelector . ' ' . $childSelector, $text);
+        return $this->callBrowser('assertDontSeeIn', $this->toCssLocator($this->resolvedSelector . ' ' . $childSelector), $text);
     }
 
     public function click(string $selector): static
@@ -250,6 +250,29 @@ abstract class Component
                 'Cannot call a scoped assertion on ' . static::class . ' because selector() returns an empty string.'
             );
         }
+    }
+
+    /**
+     * Ensures a CSS selector is treated as explicit by pest-plugin-browser's GuessLocator.
+     * Plain element-type selectors (e.g. "nav", "nav a") are not recognized as CSS
+     * and fall back to text-content matching. Appending ":is(*)" makes them explicit
+     * (the colon triggers the CSS path) while preserving the same element match.
+     */
+    private function toCssLocator(string $selector): string
+    {
+        foreach (['#', '.', '[', 'internal:'] as $prefix) {
+            if (str_starts_with($selector, $prefix)) {
+                return $selector;
+            }
+        }
+
+        foreach (['[', ']', '#', '>', '+', '~', ':', '*', '|', '^', ',', '=', '(', ')'] as $char) {
+            if (str_contains($selector, $char)) {
+                return $selector;
+            }
+        }
+
+        return $selector . ':is(*)';
     }
 
     /**
