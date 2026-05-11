@@ -30,22 +30,22 @@ function fakeUser(): Authenticatable
 // An anonymous ExamplePage subclass whose createAuthVisit() avoids a real browser.
 function authablePage(): string
 {
-    return new class(pendingBrowser()) extends ExamplePage {
+    return (new class(pendingBrowser()) extends ExamplePage {
         protected static function createAuthVisit(string $url, array $options): PendingAwaitablePage
         {
             return pendingBrowser();
         }
-    }::class;
+    })::class;
 }
 
 function authableParameterizedPage(): string
 {
-    return new class(pendingBrowser()) extends ParameterizedPage {
+    return (new class(pendingBrowser()) extends ParameterizedPage {
         protected static function createAuthVisit(string $url, array $options): PendingAwaitablePage
         {
             return pendingBrowser();
         }
-    }::class;
+    })::class;
 }
 
 beforeEach(function () {
