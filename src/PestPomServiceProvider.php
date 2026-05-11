@@ -27,5 +27,9 @@ final class PestPomServiceProvider extends ServiceProvider
 
             $this->commands([MakePageCommand::class, MakeComponentCommand::class]);
         }
+
+        if ($this->app->environment('testing')) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/testing.php');
+        }
     }
 }

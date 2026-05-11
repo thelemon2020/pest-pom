@@ -159,6 +159,52 @@ it('allows a user to log in', function () {
 
 ---
 
+## Authentication
+
+Many pages require a logged-in user. Rather than navigating to the login page and submitting credentials in every test, you can open a page pre-authenticated using `openAsUser()`.
+
+### `openAsUser()`
+
+```php
+DashboardPage::openAsUser($user)
+DashboardPage::openAsUser($user, ['id' => 5])  // parameterized page
+```
+
+Pass any `Authenticatable` model. The method generates a short-lived signed URL to a test-only login route, sends Playwright there first, and the server logs the user in and redirects to the target page — all before your test assertions begin. Because authentication happens entirely within the server process, this works with any session driver including `array`.
+
+The login route (`GET /_test/login`) is registered by the package's service provider **only when `APP_ENV=testing`** and is protected by a signed URL, so it is never reachable in production or staging environments.
+
+```php
+it('shows the dashboard for an authenticated user', function () {
+    $user = User::factory()->create();
+
+    DashboardPage::openAsUser($user)
+        ->assertSee("Welcome, {$user->name}");
+});
+
+it('shows the correct profile for a parameterized page', function () {
+    $user = User::factory()->create();
+
+    ProfilePage::openAsUser($user, ['id' => $user->id])
+        ->assertSee($user->email);
+});
+```
+
+### `openWithState()`
+
+For cases where you need to seed session state beyond just authentication — setting a wizard step, pre-populating a flash message, enabling a feature flag in the session — use `openWithState()`. Pass a callable that sets up whatever state you need; the resulting session is injected into the browser context as a cookie before the page is visited.
+
+```php
+DashboardPage::openWithState(function () use ($user) {
+    auth()->login($user);
+    session()->put('onboarding_step', 3);
+})
+```
+
+> **Note:** `openWithState()` writes the session from the PHP test process, so it requires a persistent session driver (`file` or `database`) — not `array`. If you only need to authenticate a user, prefer `openAsUser()`.
+
+---
+
 ## Creating Page Objects
 
 ### Artisan Generator
