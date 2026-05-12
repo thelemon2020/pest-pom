@@ -77,17 +77,36 @@ abstract class Page
     {
         Config::assertPageIsInConfiguredDirectory(static::class);
 
+        $targetUrl = static::resolveUrl($parameters);
+
         $loginUrl = URL::temporarySignedRoute(
             'pest-pom.test-login',
             now()->addMinutes(1),
             [
                 'model'    => get_class($user),
                 'user'     => $user->getAuthIdentifier(),
-                'redirect' => static::resolveUrl($parameters),
+                'redirect' => $targetUrl,
             ],
         );
 
-        return new static(static::createAuthVisit($loginUrl, []));
+        $pending = static::createAuthVisit($loginUrl, []);
+
+        return new static(static::wrapAsUserVisit($pending, $targetUrl));
+    }
+
+    /**
+     * Forces the pending browser to resolve (navigating through the login redirect
+     * to $targetUrl) then re-wraps it with $targetUrl as the initial URL, so that
+     * assertion failure messages reference the page the user intended to visit
+     * rather than the internal login endpoint.
+     *
+     * Override in tests to avoid starting a real browser.
+     */
+    protected static function wrapAsUserVisit(
+        PendingAwaitablePage $pending,
+        string $targetUrl,
+    ): PendingAwaitablePage|AwaitableWebpage {
+        return new AwaitableWebpage($pending->page(), $targetUrl);
     }
 
     /**

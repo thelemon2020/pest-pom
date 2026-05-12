@@ -27,13 +27,19 @@ function fakeUser(): Authenticatable
     };
 }
 
-// An anonymous ExamplePage subclass whose createAuthVisit() avoids a real browser.
+// Anonymous page subclasses that stub out both browser-creation hooks to avoid
+// starting a real Playwright browser in unit tests.
 function authablePage(): string
 {
     return (new class(pendingBrowser()) extends ExamplePage {
         protected static function createAuthVisit(string $url, array $options): PendingAwaitablePage
         {
             return pendingBrowser();
+        }
+
+        protected static function wrapAsUserVisit(PendingAwaitablePage $pending, string $targetUrl): PendingAwaitablePage
+        {
+            return $pending;
         }
     })::class;
 }
@@ -44,6 +50,11 @@ function authableParameterizedPage(): string
         protected static function createAuthVisit(string $url, array $options): PendingAwaitablePage
         {
             return pendingBrowser();
+        }
+
+        protected static function wrapAsUserVisit(PendingAwaitablePage $pending, string $targetUrl): PendingAwaitablePage
+        {
+            return $pending;
         }
     })::class;
 }
