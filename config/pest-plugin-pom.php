@@ -15,4 +15,16 @@ return [
 
     'path' => 'tests/Browser/Pages',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Login Route Middleware
+    |--------------------------------------------------------------------------
+    |
+    | The middleware applied to the /_test/login route used by openAsUser().
+    | Must include any middleware that starts the session (typically 'web').
+    |
+    */
+
+    'login_middleware' => ['web'],
+
 ];

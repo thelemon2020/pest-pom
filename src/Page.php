@@ -134,7 +134,7 @@ abstract class Page
             'storageState' => [
                 'cookies' => [[
                     'name'     => config('session.cookie'),
-                    'value'    => session()->getId(),
+                    'value'    => encrypt(session()->getId(), false),
                     'domain'   => $domain,
                     'path'     => '/',
                     'httpOnly' => true,

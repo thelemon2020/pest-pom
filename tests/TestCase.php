@@ -13,4 +13,9 @@ class TestCase extends OrchestraTestCase
     {
         return [PestPomServiceProvider::class];
     }
+
+    protected function getEnvironmentSetUp($app): void
+    {
+        $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+    }
 }
