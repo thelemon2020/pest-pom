@@ -63,27 +63,6 @@ final class Config
     }
 
     /**
-     * The middleware applied to the /_test/login route.
-     *
-     * @return array<int, string>
-     */
-    public static function loginMiddleware(): array
-    {
-        if (function_exists('config')) {
-            return config('pest-plugin-pom.login_middleware', ['web']);
-        }
-
-        $root = function_exists('base_path') ? base_path() : getcwd();
-        $file = $root.'/config/pest-plugin-pom.php';
-
-        if (file_exists($file)) {
-            return (require $file)['login_middleware'] ?? ['web'];
-        }
-
-        return ['web'];
-    }
-
-    /**
      * Throws if $className does not live in the configured pages directory.
      */
     public static function assertPageIsInConfiguredDirectory(string $className): void
